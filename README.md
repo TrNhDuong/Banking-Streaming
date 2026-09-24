@@ -39,6 +39,7 @@ flowchart LR
 Banking Streaming/
 ├── cli/              # 🛠️ Platform Operator CLI (compose, cdc, connector, logger)
 ├── deploy/           # 🚀 Production deployment artifacts (Dockerfile, compose.prod, guide)
+├── docs/             # 📚 Comprehensive documentation hub (architecture, CDC specs, guides)
 ├── infra/            # 🐳 Modular Docker Compose configurations for local dev
 ├── simulator/        # 🎭 Mock Core Banking environment (DB schema + Generator)
 │   ├── database/     # Banking DDL schema (customers, accounts, merchants, transactions)
@@ -49,6 +50,18 @@ Banking Streaming/
 ├── pytest.ini        # ⚙️ Pytest configuration
 └── README.md
 ```
+
+---
+
+## Documentation
+
+Full architectural and operational guides are available in the **[docs/](docs/README.md)** directory:
+
+- 📐 **[System Architecture & CDC Mechanics](docs/architecture.md)** — WAL replication, pgoutput, and streaming topology.
+- 🚀 **[Getting Started Guide](docs/getting-started.md)** — Step-by-step local setup, 1-click launch, and healthchecks.
+- 📋 **[CDC Event Specification](docs/cdc-event-specification.md)** — Debezium JSON envelope, operations (`c`/`u`/`d`/`r`), and schema anatomy.
+- 🏭 **[Production Deployment](docs/production-deployment.md)** — Zero-Trust DBA workflow, container registry, ECS/K8s guide.
+- 💻 **[CLI Reference Manual](docs/cli-reference.md)** — All `manage.py` commands, flags, and environment variables.
 
 ---
 
