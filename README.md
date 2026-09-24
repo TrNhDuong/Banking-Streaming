@@ -1,5 +1,7 @@
 # Banking CDC Streaming Platform
 
+[![CI - Test & Quality](https://github.com/TrNhDuong/Banking-Streaming/actions/workflows/ci.yml/badge.svg)](https://github.com/TrNhDuong/Banking-Streaming/actions/workflows/ci.yml)
+
 An enterprise-ready Change Data Capture (CDC) streaming pipeline for banking transactions, powered by **PostgreSQL**, **Debezium**, and **Apache Kafka**.
 
 ```mermaid
