@@ -1,7 +1,7 @@
 services:
   postgres:
     profiles: ["postgres"]
-    build: {context: ../../source/postgres}   # relative to infra/postgres/
+    build: {context: ../../simulator/database}   # relative to infra/postgres/
     container_name: banking-postgres
     hostname: postgres
     command: ["postgres", "-c", "wal_level=logical", "-c", "max_replication_slots=10", "-c", "max_wal_senders=10"]
@@ -19,7 +19,7 @@ services:
 
   generator:
     profiles: ["postgres"]
-    build: {context: ../../producers/transaction-generator}   # relative to infra/postgres/
+    build: {context: ../../simulator/generator}   # relative to infra/postgres/
     container_name: banking-generator
     environment:
       POSTGRES_HOST: postgres
