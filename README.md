@@ -12,14 +12,14 @@ PostgreSQL → Debezium → Kafka streaming pipeline with a CLI-first local work
 ## Local
 
 ```bash
-python -m pip install -r requirements-cli.txt
+python -m pip install -r requirements.txt
 cp .env.local.example .env.local
 
-python platform.py --env-file .env.local local up
-python platform.py --env-file .env.local local status
-python platform.py --env-file .env.local cdc verify
-python platform.py --env-file .env.local connector status
-python platform.py --env-file .env.local local down
+python manage.py --env-file .env.local local up
+python manage.py --env-file .env.local local status
+python manage.py --env-file .env.local cdc verify
+python manage.py --env-file .env.local connector status
+python manage.py --env-file .env.local local down
 ```
 
 `local up` starts Kafka + Kafka Connect + PostgreSQL, runs CDC setup,
@@ -32,8 +32,8 @@ registers the Debezium connector, and starts the transaction generator.
 ## Individual stages
 
 ```bash
-python platform.py --env-file .env.local cdc setup
-python platform.py --env-file .env.local connector apply
+python manage.py --env-file .env.local cdc setup
+python manage.py --env-file .env.local connector apply
 ```
 
 ## Render DBA SQL (production)
@@ -41,7 +41,7 @@ python platform.py --env-file .env.local connector apply
 For a production/existing DB, render the DBA prerequisites without executing:
 
 ```bash
-python platform.py --env-file .env.production cdc render
+python manage.py --env-file .env.production cdc render
 ```
 
 ## External Kafka
