@@ -1,0 +1,8 @@
+# Requires Docker Compose v2.20+ for the `include:` directive.
+# Each component is fully self-contained in its own subfolder.
+# Run via: python platform.py --env-file .env.local local up
+
+include:
+  - path: kafka/docker-compose.yml
+  - path: debezium/docker-compose.yml
+  - path: postgres/docker-compose.yml

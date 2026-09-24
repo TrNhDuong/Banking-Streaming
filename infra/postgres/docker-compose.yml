@@ -1,0 +1,39 @@
+services:
+  postgres:
+    profiles: ["postgres"]
+    build: {context: ../../source/postgres}   # relative to infra/postgres/
+    container_name: banking-postgres
+    hostname: postgres
+    command: ["postgres", "-c", "wal_level=logical", "-c", "max_replication_slots=10", "-c", "max_wal_senders=10"]
+    environment:
+      POSTGRES_DB: ${DB_NAME:-banking}
+      POSTGRES_USER: ${POSTGRES_ADMIN_USER:-bank_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:-bank_admin_password}
+    ports: ["5432:5432"]
+    volumes: [postgres_data:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_ADMIN_USER:-bank_admin} -d ${DB_NAME:-banking}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  generator:
+    profiles: ["postgres"]
+    build: {context: ../../producers/transaction-generator}   # relative to infra/postgres/
+    container_name: banking-generator
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: ${DB_NAME:-banking}
+      POSTGRES_USER: ${POSTGRES_ADMIN_USER:-bank_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_ADMIN_PASSWORD:-bank_admin_password}
+      SEED_ENABLED: ${SEED_ENABLED:-true}
+      CUSTOMER_COUNT: ${CUSTOMER_COUNT:-1000}
+      MERCHANT_COUNT: ${MERCHANT_COUNT:-200}
+      TRANSACTIONS_PER_SECOND: ${TRANSACTIONS_PER_SECOND:-5}
+      FAILURE_RATE: ${FAILURE_RATE:-0.03}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
