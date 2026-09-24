@@ -27,7 +27,7 @@ cp .env.production.example .env.production
 Generate the SQL and hand it to the DBA to run on the production DB:
 
 ```bash
-python platform.py --env-file .env.production cdc render > cdc_setup.sql
+python manage.py --env-file .env.production cdc render > cdc_setup.sql
 # Review cdc_setup.sql, then execute on the production PostgreSQL instance
 ```
 
@@ -76,7 +76,7 @@ for the K8s Deployment manifest and ConfigMap/Secret.
 Once Kafka Connect is running at `CONNECT_REST_URL`:
 
 ```bash
-python platform.py --env-file .env.production connector apply
+python manage.py --env-file .env.production connector apply
 ```
 
 ---
@@ -84,7 +84,7 @@ python platform.py --env-file .env.production connector apply
 ## Step 6 — Verify
 
 ```bash
-python platform.py --env-file .env.production connector status
+python manage.py --env-file .env.production connector status
 ```
 
 ---
