@@ -2,137 +2,175 @@
 
 [![CI - Test & Quality](https://github.com/TrNhDuong/Banking-Streaming/actions/workflows/ci.yml/badge.svg)](https://github.com/TrNhDuong/Banking-Streaming/actions/workflows/ci.yml)
 
-An enterprise-ready Change Data Capture (CDC) streaming pipeline for banking transactions, powered by **PostgreSQL**, **Debezium**, and **Apache Kafka**.
+A CDC streaming pipeline for banking transactions using **PostgreSQL**, **Debezium**, and **Apache Kafka**.
 
 ```mermaid
 flowchart LR
-    subgraph Simulator ["🎭 Simulator (Local Dev)"]
-        Gen[Transaction Generator] -->|Writes 5 tx/s| DB[(Core Banking PostgreSQL)]
-    end
-
-    subgraph CDC ["⚡ CDC Pipeline"]
-        DB -->|Logical WAL / pgoutput| Connect[Debezium Kafka Connect]
-        Connect -->|JSON CDC Events| Kafka[Apache Kafka KRaft]
-    end
-
-    subgraph Monitoring ["📊 Monitoring"]
-        Kafka --> UI[Kafka UI / Redpanda Console :8080]
-    end
+    Gen[Transaction Generator] --> DB[(PostgreSQL)]
+    DB -->|WAL / pgoutput| Connect[Debezium Connect]
+    Connect --> Kafka[Apache Kafka]
+    Kafka --> UI[Redpanda Console]
 ```
-
----
 
 ## Tech Stack
 
-- **Source Database**: PostgreSQL 16 (Logical Replication + `pgoutput` plugin)
-- **CDC Engine**: Debezium 3.5.2 (via Kafka Connect)
-- **Message Broker**: Apache Kafka 4.1.2 (KRaft mode — Zookeeper-less)
-- **Monitoring Web UI**: Redpanda Console (Kafka UI)
-- **Environment Simulator**: Synthetic Vietnamese banking transactions generator (`vi_VN` locale)
-- **Tooling**: Python 3.12 CLI operator with structured logging
+* **PostgreSQL 16** — source database
+* **Debezium 3.5.2** — CDC
+* **Apache Kafka 4.1.2** — KRaft mode
+* **Redpanda Console** — Kafka monitoring
+* **Python 3.12** — CLI and transaction simulator
+* **Docker Compose** — local infrastructure
+* **pytest** — unit testing
 
 ---
 
 ## Repository Structure
 
 ```text
-Banking Streaming/
-├── cli/              # 🛠️ Platform Operator CLI (compose, cdc, connector, logger)
-├── deploy/           # 🚀 Production deployment artifacts (Dockerfile, compose.prod, guide)
-├── docs/             # 📚 Comprehensive documentation hub (architecture, CDC specs, guides)
-├── infra/            # 🐳 Modular Docker Compose configurations for local dev
-├── simulator/        # 🎭 Mock Core Banking environment (DB schema + Generator)
-│   ├── database/     # Banking DDL schema (customers, accounts, merchants, transactions)
-│   └── generator/    # Transaction generator daemon (seed + real-time transfer stream)
-├── tests/            # 🧪 Unit test suite (81 tests, 100% offline via pytest)
-├── manage.py         # ⚡ Single entrypoint CLI runner
-├── requirements.txt  # 📦 Python project dependencies
-├── pytest.ini        # ⚙️ Pytest configuration
+Banking-Streaming/
+├── cli/            # Platform CLI
+├── deploy/         # Production deployment
+├── docs/           # Architecture and operation guides
+├── infra/          # Docker Compose configuration
+├── simulator/
+│   ├── database/   # Banking schema
+│   └── generator/  # Synthetic transaction generator
+├── tests/
+├── manage.py
+├── requirements.txt
 └── README.md
 ```
 
 ---
 
-## Documentation
+## Quick Start
 
-Full architectural and operational guides are available in the **[docs/](docs/README.md)** directory:
+### Requirements
 
-- 📐 **[System Architecture & CDC Mechanics](docs/architecture.md)** — WAL replication, pgoutput, and streaming topology.
-- 🚀 **[Getting Started Guide](docs/getting-started.md)** — Step-by-step local setup, 1-click launch, and healthchecks.
-- 📋 **[CDC Event Specification](docs/cdc-event-specification.md)** — Debezium JSON envelope, operations (`c`/`u`/`d`/`r`), and schema anatomy.
-- 🏭 **[Production Deployment](docs/production-deployment.md)** — Zero-Trust DBA workflow, container registry, ECS/K8s guide.
-- 💻 **[CLI Reference Manual](docs/cli-reference.md)** — All `manage.py` commands, flags, and environment variables.
+* Docker + Docker Compose
+* Python 3.12+
 
----
+Install dependencies:
 
-## Quickstart (Local Development)
-
-### 1. Prerequisites
-- Docker & Docker Compose v2.20+
-- Python 3.12+
-
-### 2. Setup Environment
 ```bash
-# Install dependencies
 python -m pip install -r requirements.txt
-
-# Copy local environment template
-cp .env.local.example .env.local
-# (On Windows PowerShell: Copy-Item .env.local.example .env.local)
 ```
 
-### 3. Start the Platform
+Create local environment:
+
 ```bash
-# 1-Click Launch: Starts Postgres, Kafka, Connect, applies CDC, and starts Generator
+cp .env.local.example .env.local
+```
+
+Windows PowerShell:
+
+```powershell
+Copy-Item .env.local.example .env.local
+```
+
+Start the full platform:
+
+```bash
 python manage.py --env-file .env.local local up
 ```
 
-### 4. Monitor & Inspect
-Open your browser to:
-```text
-http://localhost:8080
-```
-Inspect real-time CDC streams in topics:
-- `banking.public.transactions`
-- `banking.public.accounts`
-- `banking.public.customers`
-- `banking.public.merchants`
+This starts PostgreSQL, Kafka, Kafka Connect, configures CDC, and runs the transaction generator.
 
 ---
 
-## CLI Reference (`manage.py`)
+## Monitor CDC Events
 
-| Command | Description |
-| :--- | :--- |
-| `python manage.py local up` | Start full local stack + setup CDC + apply connector |
-| `python manage.py local status` | Show status of running containers |
-| `python manage.py local down` | Stop all local containers |
-| `python manage.py local reset` | Destroy containers and purge persistent data volumes |
-| `python manage.py cdc verify` | Verify WAL level, publications, and replication slots |
-| `python manage.py cdc render` | Render DBA SQL prerequisite script (for production review) |
-| `python manage.py connector apply` | Deploy or update Debezium connector via Connect REST API |
-| `python manage.py connector status` | Fetch connector health and task status |
-| `python manage.py connector delete` | Remove connector from Kafka Connect |
+Open:
 
-Add `-v` or `--verbose` to any command for detailed debug logging:
+```text
+http://localhost:8080
+```
+
+Main Kafka topics:
+
+```text
+banking.public.transactions
+banking.public.accounts
+banking.public.customers
+banking.public.merchants
+```
+
+---
+
+## CLI
+
+| Command                             | Description                         |
+| ----------------------------------- | ----------------------------------- |
+| `python manage.py local up`         | Start the local platform            |
+| `python manage.py local status`     | Show service status                 |
+| `python manage.py local down`       | Stop the platform                   |
+| `python manage.py local reset`      | Remove containers and volumes       |
+| `python manage.py cdc verify`       | Verify PostgreSQL CDC configuration |
+| `python manage.py cdc render`       | Generate DBA prerequisite SQL       |
+| `python manage.py connector apply`  | Create/update Debezium connector    |
+| `python manage.py connector status` | Check connector status              |
+| `python manage.py connector delete` | Delete connector                    |
+
+Verbose logging:
+
 ```bash
 python manage.py -v local status
 ```
 
 ---
 
-## Production Deployment
+## CDC Flow
 
-For deploying to production (AWS RDS, MSK, EKS, ECS, or bare-metal VMs), see the step-by-step guide in:
+```text
+PostgreSQL
+    │
+    │ WAL
+    ▼
+Debezium
+    │
+    ▼
+Kafka
+    │
+    ├── Fraud Detection
+    ├── AML Processing
+    ├── Analytics
+    └── Data Warehouse
+```
 
-👉 **[deploy/README.md](file:///c:/Users/MY%20MSI/Desktop/Project/Data%20Engineer/Banking%20Streaming/deploy/README.md)**
+The simulator generates Vietnamese banking transactions and writes them directly to PostgreSQL. Debezium captures the database changes from WAL and publishes them to Kafka.
 
 ---
 
-## Running Tests
+## Testing
 
-Unit tests run completely offline and do not require Docker:
+Tests run offline without Docker:
 
 ```bash
 python -m pytest
 ```
+
+Current test suite: **81 tests**.
+
+---
+
+## Documentation
+
+* [Architecture](docs/architecture.md)
+* [Getting Started](docs/getting-started.md)
+* [CDC Event Specification](docs/cdc-event-specification.md)
+* [Production Deployment](docs/production-deployment.md)
+* [CLI Reference](docs/cli-reference.md)
+
+Production deployment notes are also available in [`deploy/README.md`](deploy/README.md).
+
+---
+
+## Project Scope
+
+The project currently focuses on the CDC ingestion layer:
+
+```text
+PostgreSQL → Debezium → Kafka
+```
+
+Downstream systems such as fraud detection, AML pipelines, stream processing, and data warehouse ingestion can consume the Kafka topics independently.
