@@ -13,7 +13,7 @@ def compose(env_file: str, args: list[str]) -> None:
 
 
 def up_core(env_file: str) -> None:
-    compose(env_file, ["--profile", "postgres", "up", "-d", "--build", "kafka", "connect", "postgres"])
+    compose(env_file, ["--profile", "postgres", "up", "-d", "--build", "kafka", "connect", "postgres", "kafka-ui"])
 
 
 def up_generator(env_file: str) -> None:
